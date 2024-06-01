@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import ControlButton from "./ControlButton";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
@@ -40,11 +40,11 @@ const Button = styled.button`
     outline: none;
   }
 `;
-const ButtonsContainer = styled.div `
-padding-top: 39px;
-display: flex;
-width: 100%;
-justify-content: space-between;
+const ButtonsContainer = styled.div`
+  padding-top: 39px;
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
 `;
 
 const PauseButton = styled(Button)`
@@ -57,27 +57,47 @@ const CancelButton = styled(Button)`
   background: rgb(117, 118, 119);
 `;
 
-const DetailedTimer: React.FC<TimerProps> = ({ id, duration, remaining, running, updateTimer, closeTimer,  deleteTimer }) => {
+const DetailedTimer: React.FC<TimerProps> = ({
+  id,
+  duration,
+  remaining,
+  running,
+  updateTimer,
+  closeTimer,
+  deleteTimer,
+}) => {
   const { remaining: updatedRemaining, running: isRunning, pause, resume } = useTimer({
     id,
     duration,
     remaining,
     running,
     updateTimer,
-   
   });
 
+  useEffect(() => {
+    if (updatedRemaining <= 0 && isRunning) {
+      updateTimer(id, { running: false });
+    }
+  }, [updatedRemaining, isRunning, id, updateTimer]);
+
+  const handlePauseResume = () => {
+    if (isRunning) {
+      pause();
+    } else {
+      resume();
+    }
+  };
+
   const reset = () => {
-  
     closeTimer();
-   deleteTimer(id)
+    deleteTimer(id);
   };
 
   return (
     <TimerContainer>
       <ControlButton text="Таймеры" onClick={closeTimer} />
       <CountdownCircleTimer
-        isPlaying={running}
+        isPlaying={isRunning}
         duration={duration}
         initialRemainingTime={updatedRemaining}
         colors={"#29A354"}
@@ -92,7 +112,7 @@ const DetailedTimer: React.FC<TimerProps> = ({ id, duration, remaining, running,
         )}
       </CountdownCircleTimer>
       <ButtonsContainer>
-        <PauseButton onClick={isRunning ? pause : resume}>
+        <PauseButton onClick={handlePauseResume}>
           {isRunning ? "Пауза" : "Возобновить"}
         </PauseButton>
         <CancelButton onClick={reset}>Отмена</CancelButton>
@@ -102,8 +122,5 @@ const DetailedTimer: React.FC<TimerProps> = ({ id, duration, remaining, running,
 };
 
 export default DetailedTimer;
-
-
-
 
 

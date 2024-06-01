@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export interface TimerType {
   id: number;
@@ -12,17 +12,26 @@ interface UseTimerProps extends TimerType {
 }
 
 export const useTimer = ({ id, duration, remaining, running, updateTimer }: UseTimerProps) => {
+  const [timeRemaining, setTimeRemaining] = useState(remaining);
+  const [isRunning, setIsRunning] = useState(running);
   const intervalRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (running && remaining > 0) {
+    if (isRunning && timeRemaining > 0) {
       intervalRef.current = window.setInterval(() => {
-        updateTimer(id, { remaining: remaining - 1 });
+        setTimeRemaining((prevTime) => {
+          if (prevTime <= 1) {
+            clearInterval(intervalRef.current!);
+            updateTimer(id, { remaining: 0, running: false });
+            return 0;
+          }
+          updateTimer(id, { remaining: prevTime - 1 });
+          return prevTime - 1;
+        });
       }, 1000);
-    } else if (!running || remaining <= 0) {
+    } else if (!isRunning) {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
-        intervalRef.current = null;
       }
     }
     return () => {
@@ -30,21 +39,28 @@ export const useTimer = ({ id, duration, remaining, running, updateTimer }: UseT
         clearInterval(intervalRef.current);
       }
     };
-  }, [running, remaining, updateTimer, id]);
+  }, [isRunning, timeRemaining, id, updateTimer]);
 
   const pause = () => {
+    setIsRunning(false);
     updateTimer(id, { running: false });
   };
 
   const resume = () => {
+    setIsRunning(true);
     updateTimer(id, { running: true });
   };
 
+  useEffect(() => {
+    setTimeRemaining(remaining);
+    setIsRunning(running);
+  }, [remaining, running]);
+
   return {
-    remaining,
-    running,
+    remaining: timeRemaining,
+    running: isRunning,
     pause,
     resume,
-    duration
   };
 };
+

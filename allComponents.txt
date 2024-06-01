@@ -1,0 +1,606 @@
+import React, { useState } from "react";
+import styled from "styled-components";
+import ControlButton from "./ControlButton";
+import { TimerType, Title } from "../App";
+import TimePicker from "./TimerPicker";
+
+interface AddTimerProps {
+  addTimer: (duration: number) => void;
+  toggle: (a: boolean) => void;
+  openTimer: (timer: TimerType) => void;
+}
+
+const AddTimerContainer = styled.div`
+  background-color: #1c1c1c;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  color: white;
+`;
+
+const Button = styled.button`
+  background-color: green;
+  color: white;
+  font-size: 20px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+`;
+
+const AddTimer: React.FC<AddTimerProps> = ({ addTimer, toggle, openTimer }) => {
+  const [minutes, setMinutes] = useState<number>(0);
+  const [seconds, setSeconds] = useState<number>(0);
+
+  const handleStart = () => {
+    const duration = minutes * 60 + seconds;
+    addTimer(duration);
+    setMinutes(0);
+    setSeconds(0);
+    openTimer({ id: Date.now(), duration, remaining: duration, running: true });
+  };
+  const cancelTimer = () => {
+    toggle(false);
+  };
+
+  return (
+    <AddTimerContainer>
+      <ControlButton text="Отменить" onClick={cancelTimer} />
+      <Title>Таймер</Title>
+      <TimePicker
+        minutes={minutes}
+        seconds={seconds}
+        onMinutesChange={(value) => setMinutes(value)}
+        onSecondsChange={(value) => setSeconds(value)}
+      />
+      <Button onClick={handleStart}>Старт</Button>
+    </AddTimerContainer>
+  );
+};
+
+export default AddTimer;
+import { FC } from "react";
+import styled from "styled-components";
+type ControlButtonProps = {
+  text: string;
+  onClick: () => void;
+};
+const Button = styled.button`
+  color: rgb(41, 163, 84);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 110%;
+  letter-spacing: 0px;
+  text-align: left;
+  text-decoration-line: underline;
+  background: none;
+  border: none;
+  &:hover {
+    outline: none;
+  }
+  &:focus {
+    outline: none;
+  }
+`;
+
+const ControlButton: FC<ControlButtonProps> = ({ text, onClick }) => {
+  return <Button onClick={onClick}>{text}</Button>;
+};
+
+export default ControlButton;
+import React, { useEffect } from "react";
+import styled from "styled-components";
+import ControlButton from "./ControlButton";
+import { CountdownCircleTimer } from "react-countdown-circle-timer";
+
+export interface TimerProps {
+  id: number;
+  duration: number;
+  remaining: number;
+  running: boolean;
+  updateTimer: (id: number, newProps: Partial<TimerProps>) => void;
+  closeTimer: () => void;
+  deleteTimer?: (id: number) => void;
+}
+
+const TimerContainer = styled.div`
+  background-color: #2a2a2a;
+  border-radius: 10px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const TimerDisplay = styled.div`
+  font-size: 40px;
+  color: #ffffff;
+  margin-bottom: 20px;
+`;
+
+const Button = styled.button`
+  width: 161px;
+  margin: 0;
+  font-size: 1em;
+  color: #ffffff;
+  border: none;
+  border-radius: 32px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  &:hover {
+    outline: none;
+  }
+  &:focus {
+    outline: none;
+  }
+`;
+
+const PauseButton = styled(Button)`
+  box-shadow: inset -4px -6px 5.5px 0px rgba(0, 0, 0, 0.25);
+  background: rgb(249, 137, 28);
+`;
+
+const CancelButton = styled(Button)`
+  box-shadow: inset -4px -6px 5.5px 0px rgba(0, 0, 0, 0.25);
+  background: rgb(117, 118, 119);
+`;
+
+const DetailedTimer: React.FC<TimerProps> = ({
+  id,
+  duration,
+  remaining,
+  running,
+  updateTimer,
+  closeTimer,
+}) => {
+  useEffect(() => {
+    console.log(`Timer ${id} - running: ${running}, remaining: ${remaining}`);
+    let interval: number | undefined;
+    if (running && remaining > 0) {
+      interval = window.setInterval(() => {
+        updateTimer(id, { remaining: remaining - 1 });
+      }, 1000);
+    }
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [running, remaining, updateTimer, id]);
+
+  const pause = () => {
+    console.log(`Pausing timer ${id}`);
+    updateTimer(id, { running: false });
+  };
+
+  const resume = () => {
+    console.log(`Resuming timer ${id}`);
+    updateTimer(id, { running: true });
+  };
+
+  const reset = () => {
+    console.log(`Resetting timer ${id}`);
+    updateTimer(id, { remaining: duration, running: false });
+    closeTimer();
+  };
+
+  return (
+    <TimerContainer>
+      <ControlButton text="Таймеры" onClick={closeTimer} />
+      <CountdownCircleTimer
+        isPlaying={running}
+        duration={duration}
+        initialRemainingTime={remaining}
+        colors={"#29A354"}
+        trailColor="rgba(255,255,255, 0%)"
+        size={257}
+        strokeWidth={6}
+      >
+        {({ remainingTime }) => (
+          <TimerDisplay>
+            {`${Math.floor(remainingTime / 60)}:${
+              remainingTime % 60 < 10 ? "0" : ""
+            }${remainingTime % 60}`}
+          </TimerDisplay>
+        )}
+      </CountdownCircleTimer>
+      <div>
+        <PauseButton onClick={running ? pause : resume}>
+          {running ? "Пауза" : "Возобновить"}
+        </PauseButton>
+
+        <CancelButton onClick={reset}>Отмена</CancelButton>
+      </div>
+    </TimerContainer>
+  );
+};
+
+export default DetailedTimer;
+import React, { useEffect, useState } from "react";
+import styled from "styled-components";
+import IMAGES from "../assets/images";
+
+interface TimerProps {
+  id: number;
+  duration: number;
+  remaining: number;
+  running: boolean;
+  updateTimer: (id: number, newProps: Partial<TimerProps>) => void;
+  deleteTimer: (id: number) => void;
+  isEditable?: boolean;
+}
+type TimerContainerProps = {
+  justifycontent: string;
+  gap: string;
+};
+
+const TimerContainer = styled.div<TimerContainerProps>`
+  padding: 27px 0;
+  width: 338px;
+  display: flex;
+  align-items: center;
+ justify-content: ${(props) => props.justifycontent};
+ column-gap: ${(props) => props.gap};
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  }
+`;
+
+const TimerDisplay = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  font-weight: 700;
+  height: 56px;
+  color: #ffffff;
+`;
+const TimerDigits = styled.p`
+  font-size: 36px;
+  line-height: 1.1;
+  margin: 0;
+`;
+const TimerDescription = styled.p`
+  margin: 0;
+  text-align: left;
+  font-size: 10px;
+`;
+
+const ControlButton = styled.button`
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin: 0;
+  &:hover {
+    outline: none;
+  }
+  &:focus {
+    outline: none;
+  }
+`;
+
+const DeleteButton = styled(ControlButton)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #dd363c;
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  padding: 0;
+  border-radius: 50%;
+
+  &:hover {
+    background-color: #c82333;
+  }
+`;
+const PauseButton = styled(ControlButton)`
+  background-color: transparent;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+`;
+
+const ShortTimer: React.FC<TimerProps> = ({
+  id,
+  duration,
+  remaining,
+  running,
+  updateTimer,
+  isEditable,
+  deleteTimer,
+}) => {
+  useEffect(() => {
+    let interval: number;
+    if (running && remaining > 0) {
+      interval = setInterval(() => {
+        updateTimer(id, { remaining: remaining - 1 });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [running, remaining, updateTimer, id]);
+
+
+
+  const pause = () => {
+    updateTimer(id, { running: false });
+
+  };
+
+  const resume = () => {
+    updateTimer(id, { running: true });
+   
+  };
+  const deleted = () => {
+    deleteTimer(id);
+  };
+
+  return (
+    <TimerContainer
+      justifycontent={isEditable ? "flex-start" : "space-between"}
+      gap={isEditable ? "10px" : ""}
+    >
+      {isEditable && <DeleteButton onClick={deleted}>-</DeleteButton>}
+      <TimerDisplay>
+      {remaining > 0 ? (
+          <TimerDigits>{`${Math.floor(remaining / 60)}:${remaining % 60 < 10 ? "0" : ""}${remaining % 60}`}</TimerDigits>
+        ) : (
+          <TimerDigits>{`${Math.floor(duration / 60)}:${duration % 60 < 10 ? "0" : ""}${duration % 60}`}</TimerDigits>
+        )}
+        <TimerDescription>{`${Math.round(duration / 60)} мин`}</TimerDescription>
+      </TimerDisplay>
+      {running && !isEditable ? (
+        <PauseButton onClick={pause}>
+          <img src={IMAGES.pause} alt="Пауза" />
+        </PauseButton>
+      ) : (
+        !running &&
+        !isEditable && (
+          <PauseButton onClick={resume}>
+            {" "}
+            <img src={IMAGES.play} alt="Возобновить" />
+          </PauseButton>
+        )
+      )}
+    </TimerContainer>
+  );
+};
+
+export default ShortTimer;
+import React from "react";
+import Select, { SingleValue } from "react-select";
+import styled from "styled-components";
+
+const TimePickerContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: none;
+  padding: 20px;
+  border-radius: 10px;
+`;
+
+const Label = styled.div`
+  color: white;
+  font-size: 20px;
+  margin: 0 10px;
+`;
+
+const customStyles = {
+  control: (provided: any) => ({
+    ...provided,
+    backgroundColor: "#1c1c1c",
+    border: "none",
+    boxShadow: "none",
+    color: "white",
+  }),
+  menu: (provided: any) => ({
+    ...provided,
+    backgroundColor: "#1c1c1c",
+    border: "none",
+  }),
+  singleValue: (provided: any) => ({
+    ...provided,
+    color: "white",
+  }),
+  option: (provided: any, state: any) => ({
+    ...provided,
+    color: state.isSelected
+      ? "white"
+      : "linear-gradient(180.00deg, rgba(26, 31, 35, 0.7),rgba(0, 0, 0, 0.7) 100%)",
+  }),
+};
+
+interface Option {
+  value: number;
+  label: string;
+}
+
+interface TimePickerProps {
+  minutes: number;
+  seconds: number;
+  onMinutesChange: (value: number) => void;
+  onSecondsChange: (value: number) => void;
+}
+
+const TimePicker: React.FC<TimePickerProps> = ({
+  minutes,
+  seconds,
+  onMinutesChange,
+  onSecondsChange,
+}) => {
+  const minuteOptions: Option[] = Array.from({ length: 60 }, (_, i) => ({
+    value: i,
+    label: i.toString(),
+  }));
+  const secondOptions: Option[] = Array.from({ length: 60 }, (_, i) => ({
+    value: i,
+    label: i.toString(),
+  }));
+
+  return (
+    <TimePickerContainer>
+      <Select
+        options={minuteOptions}
+        value={minuteOptions.find((option) => option.value === minutes)}
+        onChange={(option: SingleValue<Option>) =>
+          onMinutesChange(option ? option.value : 0)
+        }
+        styles={customStyles}
+      />
+      <Label>мин</Label>
+      <Select
+        options={secondOptions}
+        value={secondOptions.find((option) => option.value === seconds)}
+        onChange={(option: SingleValue<Option>) =>
+          onSecondsChange(option ? option.value : 0)
+        }
+        styles={customStyles}
+      />
+      <Label>сек</Label>
+    </TimePickerContainer>
+  );
+};
+
+export default TimePicker;
+import React, { useState } from "react";
+import AddTimer from "./components/AddTimer";
+import DetailedTimer, { TimerProps } from "./components/DetailedTimer";
+import ShortTimer from "./components/ShortTimer";
+import styled from "styled-components";
+import ControlButton from "./components/ControlButton";
+import "./App.css";
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+`;
+const ControlPoint = styled.div`
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+`;
+const AddButton = styled.button`
+  color: rgb(41, 163, 84);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 110%;
+  letter-spacing: 0px;
+  text-align: left;
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0;
+`;
+
+export const Title = styled.h1`
+  color: rgb(255, 255, 255);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 110%;
+  letter-spacing: 0px;
+  text-align: left;
+`;
+
+export interface TimerType {
+  id: number;
+  duration: number;
+  remaining: number;
+  running: boolean;
+}
+
+const App: React.FC = () => {
+  const [timers, setTimers] = useState<TimerType[]>([]);
+  const [addTimerIsOpen, setAddTimerIsOpen] = useState<boolean>(false);
+  const [showDelete, setShowDelete] = useState<boolean>(false);
+  const [isTimerOpen, setIsTimerOpen] = useState<boolean>(false);
+  const [currentTimer, setCurrentTimer] = useState<TimerType | null>(null);
+
+  const openAddTimer = () => {
+    setAddTimerIsOpen(true);
+  };
+  const openTimer = (timer: TimerType) => {
+    setIsTimerOpen(true);
+    setCurrentTimer(timer);
+  };
+  const closeTimer = () => {
+    setIsTimerOpen(false);
+    setCurrentTimer(null);
+  };
+  const addTimer = (duration: number) => {
+    setTimers([
+      ...timers,
+      { id: Date.now(), duration, remaining: duration, running: true },
+    ]);
+    setAddTimerIsOpen(false);
+  };
+
+  const deleteTimer = (id: number) => {
+    setTimers(timers.filter((timer) => timer.id !== id));
+  };
+
+  const updateTimer = (id: number, newProps: Partial<TimerType>) => {
+    setTimers(
+      timers.map((timer) =>
+        timer.id === id ? { ...timer, ...newProps } : timer
+      )
+    );
+  };
+  const editTimerList = () => {
+    setShowDelete((showDelete) => !showDelete);
+  };
+
+
+  return (
+    <>
+      {!addTimerIsOpen && !isTimerOpen && (
+        <Container>
+          <ControlPoint>
+            <ControlButton
+              onClick={editTimerList}
+              text={showDelete ? "Готово" : "Править"}
+            />
+            <AddButton onClick={openAddTimer}>+</AddButton>
+          </ControlPoint>
+          <Title>Таймеры</Title>
+
+          <div>
+            {timers.map((timer) => (
+              <ShortTimer
+                key={timer.id}
+                {...timer}
+                updateTimer={updateTimer}
+                deleteTimer={deleteTimer}
+                isEditable={showDelete}
+              />
+            ))}
+          </div>
+        </Container>
+      )}
+
+      {addTimerIsOpen && (
+        <AddTimer
+          addTimer={addTimer}
+          toggle={setAddTimerIsOpen}
+          openTimer={openTimer}
+        />
+      )}
+      {isTimerOpen && currentTimer && (
+        <DetailedTimer
+          {...currentTimer}
+          updateTimer={updateTimer}
+          closeTimer={closeTimer}
+          deleteTimer={deleteTimer}
+        />
+      )}
+    </>
+  );
+};
+
+export default App;
+

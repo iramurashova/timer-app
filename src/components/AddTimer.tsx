@@ -40,10 +40,17 @@ const AddTimer: React.FC<AddTimerProps> = ({ addTimer, toggle, openTimer }) => {
 
   const handleStart = () => {
     const duration = minutes * 60 + seconds;
-    addTimer(duration);
-    setMinutes(0);
-    setSeconds(0);
-    openTimer({ id: Date.now(), duration, remaining: duration, running: true });
+    if (duration > 0) {
+      addTimer(duration);
+      setMinutes(0);
+      setSeconds(0);
+      openTimer({
+        id: Date.now(),
+        duration,
+        remaining: duration,
+        running: true,
+      });
+    }
   };
   const cancelTimer = () => {
     toggle(false);

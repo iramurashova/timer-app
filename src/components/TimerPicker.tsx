@@ -13,12 +13,20 @@ const PickerContainer = styled.div`
   justify-content: center;
   align-items: center;
   margin: 0;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+  }
 `;
 
 const Label = styled.div`
   color: white;
   font-size: 20px;
   margin: 0 10px;
+
+  @media (max-width: 600px) {
+    margin: 10px 0;
+  }
 `;
 
 const SelectWrapper = styled.div`
@@ -28,10 +36,14 @@ const SelectWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+
+  @media (max-width: 600px) {
+    height: 150px;
+  }
 `;
 
 const Select = styled.select<{ size: number }>`
-background: rgb(26, 31, 35);
+  background: rgb(26, 31, 35);
   color: white;
   font-size: 40px;
   font-weight: 700;
@@ -66,6 +78,16 @@ background: rgb(26, 31, 35);
     align-items: flex-end;
     background: rgb(26, 31, 35);
     height: 59px;
+    color: white; /* Ensure that the text color is white for all options */
+  }
+
+  @media (max-width: 600px) {
+    font-size: 30px;
+    height: 150px;
+
+    option {
+      height: 50px;
+    }
   }
 `;
 

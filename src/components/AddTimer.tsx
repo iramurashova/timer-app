@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import ControlButton from "./ControlButton";
-import { TimerType, Title } from "../App";
 import TimePicker from "./TimerPicker";
+import { TimerType } from "../utils/types";
+import Title from "./Title";
 
 interface AddTimerProps {
   addTimer: (duration: number) => void;
@@ -10,6 +11,9 @@ interface AddTimerProps {
   openTimer: (timer: TimerType) => void;
 }
 
+const ControlDiv = styled.div`
+text-align: left;
+`
 const AddTimerContainer = styled.div`
   padding: 20px;
   border-radius: 10px;
@@ -27,6 +31,7 @@ const Button = styled.button`
   border-radius: 32px;
   box-shadow: inset -4px -6px 5.5px 0px rgba(0, 0, 0, 0.25);
   background: rgb(41, 163, 84);
+  border: none;
 `;
 
 const AddTimer: React.FC<AddTimerProps> = ({ addTimer, toggle, openTimer }) => {
@@ -46,8 +51,11 @@ const AddTimer: React.FC<AddTimerProps> = ({ addTimer, toggle, openTimer }) => {
 
   return (
     <AddTimerContainer>
-      <ControlButton text="Отменить" onClick={cancelTimer} />
-      <Title>Таймер</Title>
+        <ControlDiv>
+        <ControlButton text="Отменить" onClick={cancelTimer} />
+        </ControlDiv>
+     
+        <Title text="Таймер" />
       <TimePicker
         minutes={minutes}
         seconds={seconds}

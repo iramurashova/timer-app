@@ -1,13 +1,8 @@
 import React, { useEffect } from "react";
 import styled from "styled-components";
 import IMAGES from "../assets/images";
-import { useTimer, TimerType } from "../hooks/useTimer";
-
-interface TimerProps extends TimerType {
-  updateTimer: (id: number, newProps: Partial<TimerType>) => void;
-  deleteTimer: (id: number) => void;
-  isEditable?: boolean;
-}
+import { useTimer } from "../hooks/useTimer";
+import { TimerProps } from "../utils/types";
 
 type TimerContainerProps = {
   jc: string;
@@ -93,7 +88,12 @@ const ShortTimer: React.FC<TimerProps> = ({
   isEditable,
   deleteTimer,
 }) => {
-  const { remaining: updatedRemaining, running: isRunning, pause, resume } = useTimer({
+  const {
+    remaining: updatedRemaining,
+    running: isRunning,
+    pause,
+    resume,
+  } = useTimer({
     id,
     duration,
     remaining,
@@ -127,11 +127,17 @@ const ShortTimer: React.FC<TimerProps> = ({
       {isEditable && <DeleteButton onClick={deleted}>-</DeleteButton>}
       <TimerDisplay>
         {updatedRemaining > 0 ? (
-          <TimerDigits>{`${Math.floor(updatedRemaining / 60)}:${updatedRemaining % 60 < 10 ? "0" : ""}${updatedRemaining % 60}`}</TimerDigits>
+          <TimerDigits>{`${Math.floor(updatedRemaining / 60)}:${
+            updatedRemaining % 60 < 10 ? "0" : ""
+          }${updatedRemaining % 60}`}</TimerDigits>
         ) : (
-          <TimerDigits>{`${Math.floor(duration / 60)}:${duration % 60 < 10 ? "0" : ""}${duration % 60}`}</TimerDigits>
+          <TimerDigits>{`${Math.floor(duration / 60)}:${
+            duration % 60 < 10 ? "0" : ""
+          }${duration % 60}`}</TimerDigits>
         )}
-        <TimerDescription>{`${Math.round(duration / 60)} мин`}</TimerDescription>
+        <TimerDescription>{`${Math.round(
+          duration / 60
+        )} мин`}</TimerDescription>
       </TimerDisplay>
       {isRunning && !isEditable ? (
         <Button onClick={pause}>
@@ -150,6 +156,3 @@ const ShortTimer: React.FC<TimerProps> = ({
 };
 
 export default ShortTimer;
-
-
-

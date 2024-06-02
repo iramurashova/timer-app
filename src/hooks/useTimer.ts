@@ -1,17 +1,13 @@
 import { useState, useEffect, useRef } from "react";
+import { TimerType } from "../utils/types";
 
-export interface TimerType {
-  id: number;
-  duration: number;
-  remaining: number;
-  running: boolean;
-}
+
 
 interface UseTimerProps extends TimerType {
   updateTimer: (id: number, newProps: Partial<TimerType>) => void;
 }
 
-export const useTimer = ({ id, duration, remaining, running, updateTimer }: UseTimerProps) => {
+export const useTimer = ({ id, remaining, running, updateTimer }: UseTimerProps) => {
   const [timeRemaining, setTimeRemaining] = useState(remaining);
   const [isRunning, setIsRunning] = useState(running);
   const intervalRef = useRef<number | null>(null);

@@ -1,5 +1,6 @@
 import { FC } from "react";
 import styled from "styled-components";
+
 type ControlButtonProps = {
   text: string;
   onClick: () => void;
@@ -9,7 +10,7 @@ const Button = styled.button`
   padding: 0;
   font-size: 14px;
   font-weight: 700;
-  line-height: 110%;
+  line-height: 1.1;
   letter-spacing: 0px;
   text-align: left;
   text-decoration-line: underline;

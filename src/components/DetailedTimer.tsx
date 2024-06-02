@@ -2,13 +2,8 @@ import React, { useEffect } from "react";
 import styled from "styled-components";
 import ControlButton from "./ControlButton";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
-import { useTimer, TimerType } from "../hooks/useTimer";
-
-export interface TimerProps extends TimerType {
-  updateTimer: (id: number, newProps: Partial<TimerType>) => void;
-  closeTimer: () => void;
-  deleteTimer: (id: number) => void;
-}
+import { useTimer } from "../hooks/useTimer";
+import { TimerProps } from "../utils/types";
 
 const TimerContainer = styled.div`
   border-radius: 10px;
@@ -24,22 +19,6 @@ const TimerDisplay = styled.div`
   margin-bottom: 20px;
 `;
 
-const Button = styled.button`
-  width: 161px;
-  margin: 0;
-  font-size: 1em;
-  color: #ffffff;
-  border: none;
-  border-radius: 32px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  &:hover {
-    outline: none;
-  }
-  &:focus {
-    outline: none;
-  }
-`;
 const ButtonsContainer = styled.div`
   padding-top: 39px;
   display: flex;
@@ -47,14 +26,34 @@ const ButtonsContainer = styled.div`
   justify-content: space-between;
 `;
 
-const PauseButton = styled(Button)`
+const PauseButton = styled.button`
+  width: 161px;
+  padding: 13px 0;
+  margin: 0;
+  font-size: 1em;
+  color: #ffffff;
+  border: none;
+  border-radius: 32px;
+  cursor: pointer;
+  transition: background-color 0.3s;
   box-shadow: inset -4px -6px 5.5px 0px rgba(0, 0, 0, 0.25);
   background: rgb(249, 137, 28);
+  &:hover {
+    outline: none;
+  }
+  &:focus {
+    outline: none;
+  }
 `;
 
-const CancelButton = styled(Button)`
+const CancelButton = styled(PauseButton)`
   box-shadow: inset -4px -6px 5.5px 0px rgba(0, 0, 0, 0.25);
   background: rgb(117, 118, 119);
+`;
+const ControlDiv = styled.div`
+  width: 100%;
+  padding-bottom: 16px;
+  text-align: left;
 `;
 
 const DetailedTimer: React.FC<TimerProps> = ({
@@ -66,7 +65,12 @@ const DetailedTimer: React.FC<TimerProps> = ({
   closeTimer,
   deleteTimer,
 }) => {
-  const { remaining: updatedRemaining, running: isRunning, pause, resume } = useTimer({
+  const {
+    remaining: updatedRemaining,
+    running: isRunning,
+    pause,
+    resume,
+  } = useTimer({
     id,
     duration,
     remaining,
@@ -81,21 +85,27 @@ const DetailedTimer: React.FC<TimerProps> = ({
   }, [updatedRemaining, isRunning, id, updateTimer]);
 
   const handlePauseResume = () => {
-    if (isRunning) {
-      pause();
-    } else {
-      resume();
-    }
+    isRunning ? pause() : resume();
+    
   };
 
   const reset = () => {
-    closeTimer();
+    closeTimer && closeTimer();
     deleteTimer(id);
   };
 
   return (
     <TimerContainer>
-      <ControlButton text="Таймеры" onClick={closeTimer} />
+      <ControlDiv>
+        <ControlButton
+          text="Таймеры"
+          onClick={() => {
+            closeTimer && closeTimer();
+            updateTimer(id, { running: isRunning});
+          }}
+        />
+      </ControlDiv>
+
       <CountdownCircleTimer
         isPlaying={isRunning}
         duration={duration}
@@ -107,7 +117,9 @@ const DetailedTimer: React.FC<TimerProps> = ({
       >
         {({ remainingTime }) => (
           <TimerDisplay>
-            {`${Math.floor(remainingTime / 60)}:${remainingTime % 60 < 10 ? "0" : ""}${remainingTime % 60}`}
+            {`${Math.floor(remainingTime / 60)}:${
+              remainingTime % 60 < 10 ? "0" : ""
+            }${remainingTime % 60}`}
           </TimerDisplay>
         )}
       </CountdownCircleTimer>
@@ -122,5 +134,3 @@ const DetailedTimer: React.FC<TimerProps> = ({
 };
 
 export default DetailedTimer;
-
-

@@ -38,7 +38,8 @@ const SelectWrapper = styled.div`
   justify-content: center;
 
   @media (max-width: 600px) {
-    height: 150px;
+    height: auto;
+    margin-bottom: 10px;
   }
 `;
 
@@ -82,11 +83,42 @@ const Select = styled.select<{ size: number }>`
   }
 
   @media (max-width: 600px) {
-    font-size: 30px;
-    height: 150px;
+    display: none; /* Hide the select on mobile devices */
+  }
+`;
 
-    option {
-      height: 50px;
+const ScrollList = styled.div`
+  display: none;
+
+  @media (max-width: 600px) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 195px;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    width: 100px;
+
+    &::-webkit-scrollbar {
+      width: 0px;
+      background: transparent; /* Chrome/Safari/Webkit */
+    }
+
+    & {
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE 10+ */
+    }
+
+    div {
+      height: 59px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgb(26, 31, 35);
+      color: white;
+      font-size: 40px;
+      font-weight: 700;
+      scroll-snap-align: start;
     }
   }
 `;
@@ -142,6 +174,13 @@ const TimePicker: React.FC<TimePickerProps> = ({
         >
           {minuteOptions}
         </Select>
+        <ScrollList>
+          {Array.from({ length: 60 }, (_, i) => (
+            <div key={`mobile-minute-${i}`} onClick={() => onMinutesChange(i)}>
+              {i}
+            </div>
+          ))}
+        </ScrollList>
       </SelectWrapper>
       <Label>мин</Label>
       <SelectWrapper>
@@ -152,6 +191,13 @@ const TimePicker: React.FC<TimePickerProps> = ({
         >
           {secondOptions}
         </Select>
+        <ScrollList>
+          {Array.from({ length: 60 }, (_, i) => (
+            <div key={`mobile-second-${i}`} onClick={() => onSecondsChange(i)}>
+              {i}
+            </div>
+          ))}
+        </ScrollList>
       </SelectWrapper>
       <Label>сек</Label>
     </PickerContainer>
@@ -159,3 +205,4 @@ const TimePicker: React.FC<TimePickerProps> = ({
 };
 
 export default TimePicker;
+

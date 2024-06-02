@@ -85,6 +85,7 @@ const ShortTimer: React.FC<TimerProps> = ({
   remaining,
   running,
   updateTimer,
+  openTimer,
   isEditable,
   deleteTimer,
 }) => {
@@ -125,7 +126,9 @@ const ShortTimer: React.FC<TimerProps> = ({
       g={isEditable ? "10px" : ""}
     >
       {isEditable && <DeleteButton onClick={deleted}>-</DeleteButton>}
-      <TimerDisplay>
+      <TimerDisplay
+        onClick={() => openTimer && openTimer({ id, duration, remaining, running })}
+      >
         {updatedRemaining > 0 ? (
           <TimerDigits>{`${Math.floor(updatedRemaining / 60)}:${
             updatedRemaining % 60 < 10 ? "0" : ""

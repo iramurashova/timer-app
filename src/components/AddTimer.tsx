@@ -12,8 +12,8 @@ interface AddTimerProps {
 }
 
 const ControlDiv = styled.div`
-text-align: left;
-`
+  text-align: left;
+`;
 const AddTimerContainer = styled.div`
   padding: 20px;
   border-radius: 10px;
@@ -51,14 +51,12 @@ const AddTimer: React.FC<AddTimerProps> = ({ addTimer, toggle, openTimer }) => {
 
   return (
     <AddTimerContainer>
-        <ControlDiv>
+      <ControlDiv>
         <ControlButton text="Отменить" onClick={cancelTimer} />
-        </ControlDiv>
-     
-        <Title text="Таймер" />
+      </ControlDiv>
+
+      <Title text="Таймер" />
       <TimePicker
-        minutes={minutes}
-        seconds={seconds}
         onMinutesChange={(value) => setMinutes(value)}
         onSecondsChange={(value) => setSeconds(value)}
       />

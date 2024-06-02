@@ -47,6 +47,7 @@ const App: React.FC = () => {
                 {...timer}
                 updateTimer={updateTimer}
                 deleteTimer={deleteTimer}
+                openTimer={openTimer}
                 isEditable={showDelete}
               />
             ))}
